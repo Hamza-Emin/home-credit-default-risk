@@ -1,0 +1,44 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Data and models — tracked by DVC, not git
+data_folder/
+models/
+*.pth
+*.ckpt
+*.cbm
+*.onnx
+
+# Jupyter artifacts
+notebooks/lightning_logs/
+notebooks/saved_models/
+notebooks/.pt_tmp/
+.ipynb_checkpoints/
+
+# Virtual environments
+.venv
+
+# MLflow runs
+mlruns/
+
+# Hydra outputs
+outputs/
+multirun/
+/data_folder
+/models
+
+# pytorch_tabular checkpoints
+saved_models/
+lightning_logs/
+.pt_tmp/
+
+# prettier / node
+node_modules/
+
+# Claude Code internal file
+CLAUDE.md

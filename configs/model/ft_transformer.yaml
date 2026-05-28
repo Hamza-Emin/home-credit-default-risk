@@ -1,0 +1,7 @@
+name: ft_transformer
+num_attn_blocks: 8
+num_heads: 8
+attn_dropout: 0.1
+ff_dropout: 0.1
+learning_rate: 1.0e-4
+cat_emb_dim: 4

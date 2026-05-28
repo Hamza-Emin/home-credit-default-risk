@@ -1,0 +1,7 @@
+max_epochs: 100
+batch_size: 64
+patience: 10
+accelerator: gpu
+precision: 32
+lr_scheduler: CosineAnnealingLR
+lr_scheduler_t_max: 60
