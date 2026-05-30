@@ -102,7 +102,11 @@ def train_tabnet(data: dict, cfg: DictConfig) -> None:
     cat_idxs = list(range(len(cont_cols), len(cont_cols) + len(cat_cols)))
     cat_dims = [int(X_train_df[col].nunique()) + 1 for col in cat_cols]
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = (
+        "cuda"
+        if (torch.cuda.is_available() and cfg.training.accelerator != "cpu")
+        else "cpu"
+    )
 
     mlflow.set_tracking_uri(cfg.logging.mlflow_uri)
     mlflow.set_experiment(cfg.logging.experiment_name)
@@ -171,6 +175,14 @@ def train_tabnet(data: dict, cfg: DictConfig) -> None:
         gini = 2.0 * auc - 1.0
         ks = ks_2samp(proba[y_test == 1], proba[y_test == 0]).statistic
         brier = brier_score_loss(y_test, proba)
+        precision_vals, recall_vals, thresholds = precision_recall_curve(y_test, proba)
+        f1_vals = (
+            2
+            * precision_vals[:-1]
+            * recall_vals[:-1]
+            / (precision_vals[:-1] + recall_vals[:-1] + 1e-9)
+        )
+        f1 = float(f1_vals.max())
 
         mlflow.log_metrics(
             {
@@ -178,6 +190,7 @@ def train_tabnet(data: dict, cfg: DictConfig) -> None:
                 "test_gini": gini,
                 "test_ks": ks,
                 "test_brier": brier,
+                "test_f1": f1,
             }
         )
 
@@ -190,5 +203,5 @@ def train_tabnet(data: dict, cfg: DictConfig) -> None:
 
         print(
             f"\nTabNet | AUC: {auc:.4f} | Gini: {gini:.4f} "
-            f"| KS: {ks:.4f} | Brier: {brier:.4f}"
+            f"| KS: {ks:.4f} | Brier: {brier:.4f} | F1: {f1:.4f}"
         )

@@ -15,9 +15,7 @@ models/
 *.onnx
 
 # Jupyter artifacts
-notebooks/lightning_logs/
-notebooks/saved_models/
-notebooks/.pt_tmp/
+notebooks/
 .ipynb_checkpoints/
 
 # Virtual environments

@@ -40,8 +40,15 @@ def preprocess(
     print(f"Final shape: {merged.shape}")
 
 
-def train(config_path: str = "configs", pull: bool = True, override: str = "") -> None:
+def train(
+    config_path: str = "configs",
+    pull: bool = True,
+    override: str = "",
+    gpu: bool = True,
+) -> None:
     overrides = [o.strip() for o in override.split(",") if o.strip()]
+    if not gpu:
+        overrides.append("training.accelerator=cpu")
     cfg = _load_config(config_path, overrides)
 
     if pull:
@@ -52,16 +59,22 @@ def train(config_path: str = "configs", pull: bool = True, override: str = "") -
     run_training(cfg)
 
 
-def train_xgboost(config_path: str = "configs", pull: bool = True) -> None:
-    train(config_path=config_path, pull=pull, override="model=xgboost")
+def train_xgboost(
+    config_path: str = "configs", pull: bool = True, gpu: bool = True
+) -> None:
+    train(config_path=config_path, pull=pull, override="model=xgboost", gpu=gpu)
 
 
-def train_tabnet(config_path: str = "configs", pull: bool = True) -> None:
-    train(config_path=config_path, pull=pull, override="model=tabnet")
+def train_tabnet(
+    config_path: str = "configs", pull: bool = True, gpu: bool = True
+) -> None:
+    train(config_path=config_path, pull=pull, override="model=tabnet", gpu=gpu)
 
 
-def train_ft_transformer(config_path: str = "configs", pull: bool = True) -> None:
-    train(config_path=config_path, pull=pull, override="model=ft_transformer")
+def train_ft_transformer(
+    config_path: str = "configs", pull: bool = True, gpu: bool = True
+) -> None:
+    train(config_path=config_path, pull=pull, override="model=ft_transformer", gpu=gpu)
 
 
 def main() -> None:

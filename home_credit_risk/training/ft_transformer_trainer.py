@@ -158,7 +158,8 @@ def train_ft_transformer(data: dict, cfg: DictConfig) -> None:
         )
 
         accelerator = cfg.training.accelerator if torch.cuda.is_available() else "cpu"
-        precision = cfg.training.precision if torch.cuda.is_available() else 32
+        use_gpu = accelerator == "gpu" and torch.cuda.is_available()
+        precision = cfg.training.precision if use_gpu else 32
 
         trainer_config = TrainerConfig(
             max_epochs=cfg.training.max_epochs,
@@ -223,6 +224,14 @@ def train_ft_transformer(data: dict, cfg: DictConfig) -> None:
         gini = 2.0 * auc - 1.0
         ks = ks_2samp(proba[y_test == 1], proba[y_test == 0]).statistic
         brier = brier_score_loss(y_test, proba)
+        precision_vals, recall_vals, thresholds = precision_recall_curve(y_test, proba)
+        f1_vals = (
+            2
+            * precision_vals[:-1]
+            * recall_vals[:-1]
+            / (precision_vals[:-1] + recall_vals[:-1] + 1e-9)
+        )
+        f1 = float(f1_vals.max())
 
         mlflow.log_metrics(
             {
@@ -230,6 +239,7 @@ def train_ft_transformer(data: dict, cfg: DictConfig) -> None:
                 "test_gini": gini,
                 "test_ks": ks,
                 "test_brier": brier,
+                "test_f1": f1,
             }
         )
 
@@ -242,5 +252,5 @@ def train_ft_transformer(data: dict, cfg: DictConfig) -> None:
 
         print(
             f"\nFT-Transformer | AUC: {auc:.4f} | Gini: {gini:.4f} "
-            f"| KS: {ks:.4f} | Brier: {brier:.4f}"
+            f"| KS: {ks:.4f} | Brier: {brier:.4f} | F1: {f1:.4f}"
         )

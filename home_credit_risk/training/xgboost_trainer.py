@@ -114,6 +114,7 @@ def train_xgboost(data: dict, cfg: DictConfig) -> None:
             }
         )
 
+        use_gpu = cfg.training.accelerator != "cpu"
         model = xgb.XGBClassifier(
             n_estimators=cfg.model.n_estimators,
             max_depth=cfg.model.max_depth,
@@ -123,6 +124,7 @@ def train_xgboost(data: dict, cfg: DictConfig) -> None:
             scale_pos_weight=scale_pos_weight,
             early_stopping_rounds=cfg.model.early_stopping_rounds,
             random_state=cfg.data.random_state,
+            device="cuda" if use_gpu else "cpu",
             callbacks=[_XGBMLflowCallback()],
         )
 
@@ -138,6 +140,14 @@ def train_xgboost(data: dict, cfg: DictConfig) -> None:
         gini = 2.0 * auc - 1.0
         ks = ks_2samp(proba[y_test == 1], proba[y_test == 0]).statistic
         brier = brier_score_loss(y_test, proba)
+        precision_vals, recall_vals, thresholds = precision_recall_curve(y_test, proba)
+        f1_vals = (
+            2
+            * precision_vals[:-1]
+            * recall_vals[:-1]
+            / (precision_vals[:-1] + recall_vals[:-1] + 1e-9)
+        )
+        f1 = float(f1_vals.max())
 
         mlflow.log_metrics(
             {
@@ -145,6 +155,7 @@ def train_xgboost(data: dict, cfg: DictConfig) -> None:
                 "test_gini": gini,
                 "test_ks": ks,
                 "test_brier": brier,
+                "test_f1": f1,
             }
         )
 
@@ -157,5 +168,5 @@ def train_xgboost(data: dict, cfg: DictConfig) -> None:
 
         print(
             f"\nXGBoost | AUC: {auc:.4f} | Gini: {gini:.4f} "
-            f"| KS: {ks:.4f} | Brier: {brier:.4f}"
+            f"| KS: {ks:.4f} | Brier: {brier:.4f} | F1: {f1:.4f}"
         )

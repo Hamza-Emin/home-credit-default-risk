@@ -7,11 +7,11 @@ Binary classification — predicting whether a loan applicant will default, usin
 
 All models evaluated on the same held-out test set (15% stratified split, never seen during training or SMOTE).
 
-| Model          | ROC-AUC | Gini   | KS     | Brier  |
-| -------------- | ------- | ------ | ------ | ------ |
-| XGBoost        | 0.7809  | 0.5618 | 0.4228 | 0.0664 |
-| FT-Transformer | 0.7415  | 0.4830 | 0.3744 | 0.0827 |
-| TabNet         | 0.7344  | 0.4687 | 0.3573 | 0.0771 |
+| Model          | ROC-AUC | Gini   | KS     | Brier  | F1 (opt) |
+| -------------- | ------- | ------ | ------ | ------ | -------- |
+| XGBoost        | 0.7809  | 0.5618 | 0.4228 | 0.0664 | 0.3367   |
+| FT-Transformer | 0.7415  | 0.4830 | 0.3744 | 0.0827 | 0.2807   |
+| TabNet         | 0.7344  | 0.4687 | 0.3573 | 0.0771 | 0.1950   |
 
 Metrics explained:
 
@@ -19,6 +19,7 @@ Metrics explained:
 - **Gini** — `2 × AUC − 1`, standard in credit risk
 - **KS** — maximum separation between default and non-default score distributions
 - **Brier** — mean squared error of predicted probabilities (lower is better)
+- **F1 (opt)** — F1 at the threshold that maximises it on the test set; low values reflect the ~8% default base rate (most probability scores stay below 0.5)
 
 Training used SMOTE to balance the 8% default rate in the training split only.
 All plots (ROC, Precision-Recall, loss curves) are in `plots/`.
@@ -44,6 +45,10 @@ DVC remotes (Google Drive, public viewer access):
 
 ## Train
 
+> **GPU note:** Training was done on an NVIDIA RTX 5080 (16 GB VRAM). All three models
+> default to GPU. If you do not have a CUDA-capable GPU, add `--gpu=False` and training
+> will fall back to CPU automatically (TabNet and FT-Transformer will be significantly slower).
+
 Start the MLflow tracking server in a separate terminal (keep it running):
 
 ```bash
@@ -53,9 +58,15 @@ uv run mlflow server --host 127.0.0.1 --port 8080
 Then train each model:
 
 ```bash
+# with GPU (default)
 uv run python main.py train-xgboost --pull=False
 uv run python main.py train-tabnet --pull=False
 uv run python main.py train-ft-transformer --pull=False
+
+# without GPU
+uv run python main.py train-xgboost --pull=False --gpu=False
+uv run python main.py train-tabnet --pull=False --gpu=False
+uv run python main.py train-ft-transformer --pull=False --gpu=False
 ```
 
 View experiment results at `http://127.0.0.1:8080`.
