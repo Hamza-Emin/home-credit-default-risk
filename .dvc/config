@@ -2,5 +2,9 @@
     remote = data_store
 ['remote "data_store"']
     url = gdrive://18wGpsS1iTPPI3o_T9tfuIKyEKiG5zNhD
+    gdrive_client_id = 792897017776-v50mfrir0mhfr0nj1jincc3ttapfmoi5.apps.googleusercontent.com
+    gdrive_client_secret = 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
 ['remote "models_store"']
     url = gdrive://11etWZkOh8iGQDMl0BUU3wct451DErBsv
+    gdrive_client_id = 792897017776-v50mfrir0mhfr0nj1jincc3ttapfmoi5.apps.googleusercontent.com
+    gdrive_client_secret = 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

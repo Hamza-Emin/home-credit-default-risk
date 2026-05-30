@@ -68,7 +68,7 @@ Requires Python 3.12+ and [uv](https://docs.astral.sh/uv/).
 git clone https://github.com/Hamza-Emin/home-credit-default-risk
 cd home-credit-default-risk
 uv sync
-pre-commit install
+uv run pre-commit install
 dvc pull
 ```
 
