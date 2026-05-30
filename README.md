@@ -69,11 +69,15 @@ git clone https://github.com/Hamza-Emin/home-credit-default-risk
 cd home-credit-default-risk
 uv sync
 uv run pre-commit install
-dvc pull
+uv run dvc pull
 ```
 
 `dvc pull` downloads the pre-merged feature matrix (`merged_train.csv`), raw CSVs, and
 the fixed split indices — no preprocessing step needed.
+
+> All commands use the `uv run` prefix so they work without manually activating the virtual
+> environment. Alternatively, activate it first with `.venv\Scripts\activate` (Windows) or
+> `source .venv/bin/activate` (Linux/macOS) and omit the `uv run` prefix.
 
 DVC remotes (Google Drive, public viewer access):
 
@@ -93,7 +97,7 @@ Start the MLflow tracking server in a separate terminal (keep it running):
 uv run mlflow server --host 127.0.0.1 --port 8080
 ```
 
-Then train each model:
+Then train each model (in a second terminal):
 
 ```bash
 # with GPU (default)
