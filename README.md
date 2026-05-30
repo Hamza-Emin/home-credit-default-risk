@@ -34,11 +34,11 @@ split only.
 
 ### Models
 
-| Model          | ROC-AUC | Gini   | KS     | Brier  | F1 (opt) |
-| -------------- | ------- | ------ | ------ | ------ | -------- |
-| XGBoost        | 0.7794  | 0.5588 | 0.4210 | 0.0664 | 0.3356   |
-| FT-Transformer | 0.7415  | 0.4830 | 0.3744 | 0.0827 | 0.2807   |
-| TabNet         | 0.7344  | 0.4687 | 0.3573 | 0.0771 | 0.1950   |
+| Model          | ROC-AUC | Gini   | KS     | Brier  | F1     |
+| -------------- | ------- | ------ | ------ | ------ | ------ |
+| XGBoost        | 0.7794  | 0.5588 | 0.4210 | 0.0664 | 0.3356 |
+| FT-Transformer | 0.7415  | 0.4830 | 0.3744 | 0.0827 | 0.2807 |
+| TabNet         | 0.7344  | 0.4687 | 0.3573 | 0.0771 | 0.1950 |
 
 - **XGBoost** — gradient boosting baseline with `scale_pos_weight` for class imbalance
 - **TabNet** — attention-based tabular model with automatic feature selection
@@ -50,7 +50,7 @@ split only.
 - **Gini** — `2 × AUC − 1`; standard in credit risk / banking industry
 - **KS Statistic** — maximum separation between predicted default and non-default distributions
 - **Brier Score** — mean squared error of predicted probabilities; measures calibration
-- **F1 (optimal threshold)** — F1 at the threshold that maximises it on the test set
+- **F1** — F1 at the threshold that maximises it on the test set
 
 ### Validation
 
