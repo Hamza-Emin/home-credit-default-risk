@@ -7,11 +7,11 @@ Binary classification — predicting whether a loan applicant will default, usin
 
 All models evaluated on the same held-out test set (15% stratified split, never seen during training or SMOTE).
 
-| Model          | ROC-AUC | Gini   | KS     | Brier  | F1 (opt) |
-| -------------- | ------- | ------ | ------ | ------ | -------- |
-| XGBoost        | 0.7809  | 0.5618 | 0.4228 | 0.0664 | 0.3367   |
-| FT-Transformer | 0.7415  | 0.4830 | 0.3744 | 0.0827 | 0.2807   |
-| TabNet         | 0.7344  | 0.4687 | 0.3573 | 0.0771 | 0.1950   |
+| Model          | ROC-AUC | Gini   | KS     | Brier  | F1     |
+| -------------- | ------- | ------ | ------ | ------ | ------ |
+| XGBoost        | 0.7809  | 0.5618 | 0.4228 | 0.0664 | 0.3367 |
+| FT-Transformer | 0.7415  | 0.4830 | 0.3744 | 0.0827 | 0.2807 |
+| TabNet         | 0.7344  | 0.4687 | 0.3573 | 0.0771 | 0.1950 |
 
 Metrics explained:
 
@@ -19,7 +19,7 @@ Metrics explained:
 - **Gini** — `2 × AUC − 1`, standard in credit risk
 - **KS** — maximum separation between default and non-default score distributions
 - **Brier** — mean squared error of predicted probabilities (lower is better)
-- **F1 (opt)** — F1 at the threshold that maximises it on the test set; low values reflect the ~8% default base rate (most probability scores stay below 0.5)
+- **F1 ** — F1 at the threshold that maximises it on the test set; low values reflect the ~8% default base rate
 
 Training used SMOTE to balance the 8% default rate in the training split only.
 All plots (ROC, Precision-Recall, loss curves) are in `plots/`.
