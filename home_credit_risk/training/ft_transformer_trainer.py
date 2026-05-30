@@ -4,6 +4,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import mlflow
 import numpy as np
+import pytorch_tabular.tabular_model as _pt_model
 import torch
 from omegaconf import DictConfig
 from pytorch_lightning.callbacks import Callback
@@ -190,8 +191,6 @@ def train_ft_transformer(data: dict, cfg: DictConfig) -> None:
         epoch_logger = _MLflowEpochLogger()
 
         # pytorch_tabular checkpoints embed omegaconf objects; patch loader for trusted local files
-        import pytorch_tabular.tabular_model as _pt_model
-
         def _patched_pl_load(path_or_url, map_location=None):
             return torch.load(
                 path_or_url, map_location=map_location, weights_only=False

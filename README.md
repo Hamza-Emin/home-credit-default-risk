@@ -1,28 +1,64 @@
 # Home Credit Default Risk
 
-Binary classification — predicting whether a loan applicant will default, using the
-[Home Credit Default Risk](https://www.kaggle.com/competitions/home-credit-default-risk) dataset.
+## Project Description
 
-## Results
+### Problem Statement
 
-All models evaluated on the same held-out test set (15% stratified split, never seen during training or SMOTE).
+The goal of this project is to predict whether a loan applicant will experience repayment
+difficulties, based on their application data, credit history, and behavioral financial
+records. This is a binary classification problem: the target variable is 1 if the client
+had late payments exceeding a threshold on at least one of the first installments of their
+loan, and 0 otherwise.
 
-| Model          | ROC-AUC | Gini   | KS     | Brier  | F1     |
-| -------------- | ------- | ------ | ------ | ------ | ------ |
-| XGBoost        | 0.7809  | 0.5618 | 0.4228 | 0.0664 | 0.3367 |
-| FT-Transformer | 0.7415  | 0.4830 | 0.3744 | 0.0827 | 0.2807 |
-| TabNet         | 0.7344  | 0.4687 | 0.3573 | 0.0771 | 0.1950 |
+This problem is commercially critical for consumer lending institutions. Incorrectly
+rejecting a creditworthy applicant results in lost business, while approving a high-risk
+applicant leads to direct financial losses. Home Credit Group released this dataset to
+improve loan decisions for the unbanked population — people who lack traditional credit
+histories. A reliable default risk predictor allows institutions to make fairer,
+data-driven, and financially sound lending decisions.
 
-Metrics explained:
+### Dataset
 
-- **ROC-AUC** — probability that model ranks a defaulter above a non-defaulter
-- **Gini** — `2 × AUC − 1`, standard in credit risk
-- **KS** — maximum separation between default and non-default score distributions
-- **Brier** — mean squared error of predicted probabilities (lower is better)
-- **F1 ** — F1 at the threshold that maximises it on the test set; low values reflect the ~8% default base rate
+The [Home Credit Default Risk](https://www.kaggle.com/competitions/home-credit-default-risk)
+dataset consists of 8 CSV files (~2.6 GB total). The main file is `application_train.csv`
+with 307,511 rows and 122 columns (106 numerical, 16 categorical) covering demographics,
+employment, loan characteristics, external credit scores, and regional indicators.
 
-Training used SMOTE to balance the 8% default rate in the training split only.
-All plots (ROC, Precision-Recall, loss curves) are in `plots/`.
+The remaining 7 files contain historical data per applicant: previous loan applications
+(1.67M rows), credit bureau records (1.71M rows), installment payment history (13.6M rows),
+credit card balances (3.84M rows), and more. These are aggregated and joined onto the main
+table as additional features.
+
+Key challenge: severe class imbalance (~8% defaulters). Handled via SMOTE on the training
+split only.
+
+### Models
+
+| Model          | ROC-AUC | Gini   | KS     | Brier  | F1 (opt) |
+| -------------- | ------- | ------ | ------ | ------ | -------- |
+| XGBoost        | 0.7809  | 0.5618 | 0.4228 | 0.0664 | 0.3367   |
+| FT-Transformer | 0.7415  | 0.4830 | 0.3744 | 0.0827 | 0.2807   |
+| TabNet         | 0.7344  | 0.4687 | 0.3573 | 0.0771 | 0.1950   |
+
+- **XGBoost** — gradient boosting baseline with `scale_pos_weight` for class imbalance
+- **TabNet** — attention-based tabular model with automatic feature selection
+- **FT-Transformer** — transformer architecture applied to tabular features
+
+### Metrics
+
+- **ROC-AUC** — official competition metric; robust to class imbalance
+- **Gini** — `2 × AUC − 1`; standard in credit risk / banking industry
+- **KS Statistic** — maximum separation between predicted default and non-default distributions
+- **Brier Score** — mean squared error of predicted probabilities; measures calibration
+- **F1 (optimal threshold)** — F1 at the threshold that maximises it on the test set
+
+### Validation
+
+70 / 15 / 15 stratified split saved to `data_folder/split_indices.npz` (SHA256 hash in
+`data_folder/split_indices_hash.txt`). SMOTE is applied to the training split only at
+training time — val and test sets reflect the original class distribution.
+
+---
 
 ## Setup
 
@@ -32,6 +68,7 @@ Requires Python 3.12+ and [uv](https://docs.astral.sh/uv/).
 git clone https://github.com/Hamza-Emin/home-credit-default-risk
 cd home-credit-default-risk
 uv sync
+pre-commit install
 dvc pull
 ```
 
@@ -47,7 +84,8 @@ DVC remotes (Google Drive, public viewer access):
 
 > **GPU note:** Training was done on an NVIDIA RTX 5080 (16 GB VRAM). All three models
 > default to GPU. If you do not have a CUDA-capable GPU, add `--gpu=False` and training
-> will fall back to CPU automatically (TabNet and FT-Transformer will be significantly slower).
+> will fall back to CPU automatically (TabNet and FT-Transformer will be significantly
+> slower).
 
 Start the MLflow tracking server in a separate terminal (keep it running):
 
@@ -71,23 +109,13 @@ uv run python main.py train-ft-transformer --pull=False --gpu=False
 
 View experiment results at `http://127.0.0.1:8080`.
 
-## Reproducibility
-
-The 70/15/15 stratified split is computed once and saved to
-`data_folder/split_indices.npz` (SHA256 hash in `data_folder/split_indices_hash.txt`).
-Every subsequent run loads the saved indices — no new split is created.
-
-SMOTE is applied to the training split only, using `random_state=42`.
-Because the split indices are fixed and the random seed is fixed,
-SMOTE produces the same synthetic samples on every run.
-Val and test sets are never touched by SMOTE and reflect the original class distribution (~8% default).
-
-## Project structure
+## Project Structure
 
 ```text
 configs/          Hydra config files (data, model, training, logging)
 home_credit_risk/ Python package
   data/           data loading, splitting, SMOTE
+  data_aggregation/ feature engineering from supplementary tables
   training/       XGBoost, TabNet, FT-Transformer trainers
 plots/            ROC, PR, and loss curves for each model
 models/           Saved model artifacts (DVC-tracked)

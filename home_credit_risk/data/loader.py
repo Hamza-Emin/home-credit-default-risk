@@ -97,25 +97,27 @@ def load_data(cfg: DictConfig) -> dict:
     id_col = cfg.data.id_col
     feature_cols = [c for c in df.columns if c not in (target_col, id_col)]
 
-    X = df[feature_cols].copy()
-    y = df[target_col].values
+    features = df[feature_cols].copy()
+    labels = df[target_col].values
     cont_cols = [c for c in feature_cols if c not in cat_cols]
 
-    train_idx, val_idx, test_idx = _get_or_create_splits(len(X), y, cfg, data_path)
+    train_idx, val_idx, test_idx = _get_or_create_splits(
+        len(features), labels, cfg, data_path
+    )
 
-    X_train = X.iloc[train_idx].reset_index(drop=True)
-    y_train = y[train_idx]
+    X_train = features.iloc[train_idx].reset_index(drop=True)
+    y_train = labels[train_idx]
 
     # SMOTE applies only to training data — val/test stay untouched
     X_train, y_train = _apply_smote(X_train, y_train, cat_cols, cfg.data.random_state)
 
     return {
         "X_train": X_train,
-        "X_val": X.iloc[val_idx].reset_index(drop=True),
-        "X_test": X.iloc[test_idx].reset_index(drop=True),
+        "X_val": features.iloc[val_idx].reset_index(drop=True),
+        "X_test": features.iloc[test_idx].reset_index(drop=True),
         "y_train": y_train,
-        "y_val": y[val_idx],
-        "y_test": y[test_idx],
+        "y_val": labels[val_idx],
+        "y_test": labels[test_idx],
         "cat_cols": cat_cols,
         "cont_cols": cont_cols,
         "encoders": encoders,
