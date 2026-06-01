@@ -91,27 +91,62 @@ DVC remotes (Google Drive, public viewer access):
 > will fall back to CPU automatically (TabNet and FT-Transformer will be significantly
 > slower).
 
-Start the MLflow tracking server in a separate terminal (keep it running):
+### Stage 1 — Data loading
+
+`dvc pull` (run during Setup) downloads `data_folder/` which contains the raw CSVs,
+the pre-merged feature matrix `merged_train.csv`, and the fixed split indices
+`split_indices.npz`.
+
+```bash
+uv run dvc pull
+```
+
+### Stage 2 — Preprocessing
+
+Aggregates the 7 supplementary tables (bureau, previous applications, installments,
+credit card balances, POS cash) and merges them into a single flat feature matrix joined
+on `SK_ID_CURR`. The result is saved as `data_folder/merged_train.csv`.
+
+```bash
+uv run python main.py preprocess --pull=False
+```
+
+> This step is already done — `merged_train.csv` is included in the DVC pull. Only run
+> this if you modify the feature engineering code and need to regenerate the merged file.
+
+### Stage 3 — MLflow server
+
+Start the tracking server in a separate terminal and keep it running:
 
 ```bash
 uv run mlflow server --host 127.0.0.1 --port 8080
 ```
 
-Then train each model (in a second terminal):
+### Stage 3 — Model training
+
+Each model is trained independently. Run one or all in a second terminal:
+
+**XGBoost** (baseline, ~5 min on GPU):
 
 ```bash
-# with GPU (default)
 uv run python main.py train-xgboost --pull=False
-uv run python main.py train-tabnet --pull=False
-uv run python main.py train-ft-transformer --pull=False
-
-# without GPU
-uv run python main.py train-xgboost --pull=False --gpu=False
-uv run python main.py train-tabnet --pull=False --gpu=False
-uv run python main.py train-ft-transformer --pull=False --gpu=False
 ```
 
-View experiment results at `http://127.0.0.1:8080`.
+**TabNet** (attention-based, ~15 min on GPU):
+
+```bash
+uv run python main.py train-tabnet --pull=False
+```
+
+**FT-Transformer** (transformer, ~30 min on GPU):
+
+```bash
+uv run python main.py train-ft-transformer --pull=False
+```
+
+To train without a GPU, append `--gpu=False` to any command above.
+
+View all experiment results at `http://127.0.0.1:8080`. Plots are saved to `plots/`.
 
 ## Project Structure
 
