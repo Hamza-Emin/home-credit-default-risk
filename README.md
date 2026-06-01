@@ -122,7 +122,7 @@ Start the tracking server in a separate terminal and keep it running:
 uv run mlflow server --host 127.0.0.1 --port 8080
 ```
 
-### Stage 3 — Model training
+### Stage 4 — Model training
 
 Each model is trained independently. Run one or all in a second terminal:
 

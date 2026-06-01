@@ -114,7 +114,7 @@ def train_ft_transformer(data: dict, cfg: DictConfig) -> None:
     cat_cols = data["cat_cols"]
     cont_cols = data["cont_cols"]
 
-    target_col = "TARGET"
+    target_col = cfg.data.target_col
 
     # pytorch_tabular requires categoricals as strings and continuous as float32
     for df in (X_train_df, X_val_df, X_test_df):
