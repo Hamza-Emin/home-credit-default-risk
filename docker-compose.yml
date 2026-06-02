@@ -1,0 +1,27 @@
+services:
+  mlflow:
+    build: .
+    command: uv run mlflow server --host 0.0.0.0 --port 8080
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./mlruns:/app/mlruns
+
+  trainer:
+    build: .
+    environment:
+      - MLFLOW_URI=http://mlflow:8080
+    volumes:
+      - ./data_folder:/app/data_folder
+      - ./models:/app/models
+      - ./plots:/app/plots
+      - ./mlruns:/app/mlruns
+    depends_on:
+      - mlflow
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

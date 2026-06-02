@@ -37,6 +37,3 @@ lightning_logs/
 
 # prettier / node
 node_modules/
-
-# Claude Code internal file
-CLAUDE.md

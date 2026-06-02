@@ -75,6 +75,8 @@ uv run dvc pull
 `dvc pull` downloads the pre-merged feature matrix (`merged_train.csv`), raw CSVs, and
 the fixed split indices — no preprocessing step needed.
 
+> Important Note: I used google drive as my sotrage , dvc pull directly pulls the data from my google drive. In order to achieve this, I put my google drive folder secrets into the project directly so dvc pull commands run without any additional effort.
+> I know we are trying to do a project in the industrial level. Normally I know that , ı should share the secrets about google folder privatly to reciever and they would put it into correct places. But ı choose this becuase ı did not want you waste effort about creating credentials.
 > All commands use the `uv run` prefix so they work without manually activating the virtual
 > environment. Alternatively, activate it first with `.venv\Scripts\activate` (Windows) or
 > `source .venv/bin/activate` (Linux/macOS) and omit the `uv run` prefix.
@@ -147,6 +149,45 @@ uv run python main.py train-ft-transformer --pull=False
 To train without a GPU, append `--gpu=False` to any command above.
 
 View all experiment results at `http://127.0.0.1:8080`. Plots are saved to `plots/`.
+
+Note: I did not put an inference script from the models that we trained as I said in my project proposal becuase from the project document that you shared with us, it is being said that we are responsible for training the models , not the inference part.
+If ı misunderstood , please let me know , I can put that quickly.
+
+## Docker , 2nd Way To Run The Project After Pulling The Data with DVC PULL
+
+I implemented the training and mlflow process also in the docker. The MLflow container and trainer container share a
+network — the trainer automatically points to the MLflow container using the `MLFLOW_URI`
+environment variable. If a CUDA-capable GPU and `nvidia-container-toolkit` are present the
+trainer uses it; otherwise training falls back to CPU silently.
+
+**Prerequisites:** [Docker](https://docs.docker.com/get-docker/) installed. For GPU support
+also install [nvidia-container-toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html).
+
+Build the image (first time only, or after dependency changes):
+
+```bash
+docker compose build
+```
+
+Start MLflow and train a model and save the model , plots into appropiete folders :
+
+```bash
+# MLflow server starts automatically as a dependency
+docker compose run --rm trainer uv run python main.py train-xgboost --pull=False
+docker compose run --rm trainer uv run python main.py train-tabnet --pull=False
+docker compose run --rm trainer uv run python main.py train-ft-transformer --pull=False
+```
+
+View experiment results at `http://localhost:8080` (MLflow stays running in the background).
+
+Stop all containers:
+
+```bash
+docker compose down
+```
+
+> Data (`data_folder/`), models (`models/`), plots (`plots/`), and MLflow runs (`mlruns/`)
+> are mounted as volumes so all outputs are persisted on your host machine.
 
 ## Project Structure
 
